@@ -1,0 +1,16 @@
+#CONNECTIONS
+|reed switch --->D27 & gnd
+
+|Buzzer ---> D25 & gnd
+
+|OLED ---> 
+    VCC---> 3V3
+    GND---> GND 
+    SCL---> D22
+    SDA---> D21
+
+|GPS --->
+    VCC--->3v3
+    GND--->GND
+    RX--->TX
+    TX--->RX
