@@ -13,9 +13,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 BLEScan* pBLEScan;
 
-std::string targetMAC = "50:f1:4a:49:90:3a";   // YOUR HM-10 MAC
+std::string targetMAC = "50:f1:4a:49:90:3a";
 
 int buzzerPin = 25;
+int reedPin = 27;   // REED SENSOR PIN
 
 /* ---- RANGE SETTINGS ---- */
 int threshold = -100;
@@ -31,6 +32,7 @@ void setup() {
   delay(1000);
 
   pinMode(buzzerPin, OUTPUT);
+  pinMode(reedPin, INPUT_PULLUP);   // Reed switch
 
   // OLED
   Wire.begin(21, 22);
@@ -76,7 +78,6 @@ void loop() {
 
       rssiValue = device.getRSSI();
 
-      // RSSI smoothing
       avgRSSI = (avgRSSI * 6 + rssiValue) / 7;
 
       Serial.print("RSSI: ");
@@ -92,10 +93,18 @@ void loop() {
     Serial.println(lostCount);
   }
 
+  /* ---- REED SENSOR CHECK ---- */
+  bool tamper = digitalRead(reedPin);   // HIGH = open / tampered
+  /* --------------------------- */
+
   bool buzzerState = false;
   String statusText = "INSIDE";
 
-  if (lostCount >= lostLimit) {
+  if (tamper) {
+    buzzerState = true;
+    statusText = "TAMPER!";
+  }
+  else if (lostCount >= lostLimit) {
     buzzerState = true;
     statusText = "BEACON LOST";
   }
@@ -106,7 +115,8 @@ void loop() {
 
   digitalWrite(buzzerPin, buzzerState ? HIGH : LOW);
 
-  // OLED Display
+  /* ---- OLED DISPLAY ---- */
+
   display.clearDisplay();
   display.setCursor(0,0);
 
@@ -121,6 +131,9 @@ void loop() {
 
   display.print("Missed: ");
   display.println(lostCount);
+
+  display.print("Reed: ");
+  display.println(tamper ? "OPEN" : "CLOSED");
 
   display.print("Status: ");
   display.println(statusText);
