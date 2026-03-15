@@ -8,6 +8,7 @@
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 BLEScan* pBLEScan;
@@ -16,15 +17,16 @@ std::string targetMAC = "50:f1:4a:49:90:3a";   // YOUR HM-10 MAC
 
 int buzzerPin = 25;
 
-/* ---- RANGE SETTINGS (for ~10m) ---- */
-int threshold = -100;     // adjust after testing (-80 to -88 typical)
+/* ---- RANGE SETTINGS ---- */
+int threshold = -100;
 int lostCount = 0;
 int lostLimit = 15;
-/* ---------------------------------- */
+/* ------------------------ */
 
 int avgRSSI = -100;
 
 void setup() {
+
   Serial.begin(115200);
   delay(1000);
 
@@ -36,15 +38,18 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
+
   display.setCursor(0,0);
   display.println("Bracelet Starting...");
   display.display();
+
   delay(1000);
   display.clearDisplay();
 
   // BLE
   BLEDevice::init("");
   delay(500);
+
   Serial.println("BLE Ready");
 
   pBLEScan = BLEDevice::getScan();
@@ -53,21 +58,25 @@ void setup() {
 
 void loop() {
 
-  BLEScanResults results = pBLEScan->start(1, false);
+  BLEScanResults* results = pBLEScan->start(1, false);
 
   bool found = false;
   int rssiValue = -100;
 
-  for (int i = 0; i < results.getCount(); i++) {
-    BLEAdvertisedDevice device = results.getDevice(i);
+  for (int i = 0; i < results->getCount(); i++) {
 
-    if (device.getAddress().toString() == targetMAC) {
+    BLEAdvertisedDevice device = results->getDevice(i);
+
+    std::string addr = std::string(device.getAddress().toString().c_str());
+
+    if (addr == targetMAC) {
+
       found = true;
       lostCount = 0;
 
       rssiValue = device.getRSSI();
 
-      // Strong smoothing for stable distance
+      // RSSI smoothing
       avgRSSI = (avgRSSI * 6 + rssiValue) / 7;
 
       Serial.print("RSSI: ");
@@ -97,23 +106,31 @@ void loop() {
 
   digitalWrite(buzzerPin, buzzerState ? HIGH : LOW);
 
-  // OLED
+  // OLED Display
   display.clearDisplay();
   display.setCursor(0,0);
+
   display.println("BLE Bracelet");
   display.println("----------------");
+
   display.print("RSSI: ");
   display.println(rssiValue);
+
   display.print("AVG: ");
   display.println(avgRSSI);
+
   display.print("Missed: ");
   display.println(lostCount);
+
   display.print("Status: ");
   display.println(statusText);
+
   display.print("Buzzer: ");
   display.println(buzzerState ? "ON" : "OFF");
+
   display.display();
 
   pBLEScan->clearResults();
+
   delay(150);
 }
