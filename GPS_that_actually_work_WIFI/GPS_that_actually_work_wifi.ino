@@ -16,12 +16,12 @@ TinyGPSPlus gps;
 HardwareSerial gpsSerial(2);
 
 /* WIFI */
-const char* ssid = "abhyas zala ka";
-const char* password = "nahi zala";
+const char* ssid = "enter your credentials";
+const char* password = "enter your credentials";
 
 /* TELEGRAM */
-String BOT_TOKEN = "";
-String CHAT_ID   = "";
+String BOT_TOKEN = "enter your credentials";
+String CHAT_ID   = "enter your credentials";
 
 /* GPS PINS */
 #define RXD2 16
