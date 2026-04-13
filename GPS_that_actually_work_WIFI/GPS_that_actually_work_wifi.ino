@@ -20,8 +20,8 @@ const char* ssid = "abhyas zala ka";
 const char* password = "nahi zala";
 
 /* TELEGRAM */
-String BOT_TOKEN = "8538484727:AAFny3_EuTo2Ojm1qKV-dHhePaVwA4z0QDI";
-String CHAT_ID   = "1764213975";
+String BOT_TOKEN = "";
+String CHAT_ID   = "";
 
 /* GPS PINS */
 #define RXD2 16
